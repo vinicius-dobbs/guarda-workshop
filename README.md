@@ -30,6 +30,26 @@ npm install
 
 ## Executando o projeto
 
+### Oficina local (eSignet, Certify e Mimoto)
+
+Copie `.env.example` para `.env` e substitua `SEU_IP_DA_REDE` pelo **mesmo IPv4**
+configurado como `WORKSHOP_HOST` no Docker Compose da oficina. O IP deve ser
+alcançável pelo emulador e pelos contêineres; não use `localhost` nem
+`10.0.2.2`. A carteira usa apenas identidades fictícias nesse modo.
+
+```bash
+cp .env.example .env
+npm run android
+```
+
+O `.env` é local e ignorado pelo Git. Nunca coloque segredos em variáveis
+`EXPO_PUBLIC_`: seus valores são embutidos no aplicativo. Após mudar o `.env`,
+reinicie o Metro para carregar as novas URLs.
+
+`npm start` e `npm run android` usam a porta **8081** do Metro. Para iniciar
+`npx expo run:android` diretamente, informe `--port 8081`. O Breja.me usa
+outra porta (8082), permitindo executar os dois apps ao mesmo tempo.
+
 ### Expo Go (desenvolvimento rápido)
 
 ```bash

@@ -7,6 +7,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // crypto.subtle shim for jsonld - must run before any SDK imports
 import './src/polyfills';
+import './src/workshopFetch';
 
 
 import { handleDeepLink, PENDING_KEY } from './src/services/deepLinkHandler';
@@ -24,6 +25,7 @@ import QrScanner from './src/screens/QrScanner/QrScanner';
 import Header from './src/components/Header/Header';
 import NoCredentialModal from './src/components/NoCredentialModal';
 import { useAuthStore } from './src/store/authStore';
+import { isWorkshopMode, workshopCertifyUrl } from './src/services/workshopIssuer';
 
 
 export default function App() {
@@ -77,7 +79,7 @@ export default function App() {
     const SDK_CONFIG = {
       appId: 'Carteira-wallet',
       network: {
-        baseUrl: process.env.EXPO_PUBLIC_BASE_URL,
+        baseUrl: isWorkshopMode ? new URL(workshopCertifyUrl).origin : process.env.EXPO_PUBLIC_BASE_URL,
         oauth: {
           authorizationUrl: process.env.EXPO_PUBLIC_OAUTH_AUTHORIZATION_URL,
           tokenUrl:         process.env.EXPO_PUBLIC_OAUTH_TOKEN_URL,
@@ -107,7 +109,7 @@ export default function App() {
             setTimeout(tryInit, RETRY_DELAY);
           } else {
             console.error('[App] SDK init gave up after max retries');
-            setSdkReady(true);
+            setSdkReady(false);
           }
         });
     };

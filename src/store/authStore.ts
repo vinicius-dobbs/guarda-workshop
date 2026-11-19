@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import * as SecureStore from 'expo-secure-store';
 import { getAuthDataFromStorage, clearAllAuthDataFromStorage } from '../components/CustomAuthWebView/authStorage';
+import { isWorkshopMode } from '../services/workshopIssuer';
+import { getWorkshopTokenProblem } from '../services/workshopToken';
 
 interface User {
   sub?: string;
@@ -37,6 +39,10 @@ export const useAuthStore = create<AuthState>((set) => ({
     const data = await getAuthDataFromStorage();
     if (data?.user) {
       const accessToken = await SecureStore.getItemAsync('access_token').catch(() => null);
+      if (isWorkshopMode && (!accessToken || getWorkshopTokenProblem(accessToken))) {
+        set({ isAuthenticated: false, user: null, accessToken: null });
+        return;
+      }
       set({ isAuthenticated: true, user: data.user, accessToken });
     }
   },

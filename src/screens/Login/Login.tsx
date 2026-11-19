@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
-import { KeyboardAvoidingView, Platform, Image, Dimensions } from 'react-native';
+import { KeyboardAvoidingView, Platform, Image, Dimensions, Text } from 'react-native';
 
 const { height } = Dimensions.get('window');
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CustomAuthWebView } from '../../components/CustomAuthWebView';
+import { isWorkshopMode } from '../../services/workshopIssuer';
 import {
   Container,
   ScrollContainer,
@@ -22,6 +23,7 @@ import {
 export default function Login({ onLogin, onBack }) {
   const insets = useSafeAreaInsets();
   const [showWebView, setShowWebView] = useState(false);
+  const [loginError, setLoginError] = useState('');
 
   const handleSuccess = async (authData: any) => {
     setShowWebView(false);
@@ -29,7 +31,11 @@ export default function Login({ onLogin, onBack }) {
   };
 
   const handleError = (error: string) => {
-    console.error('Auth error:', error);
+    if (isWorkshopMode) {
+      setLoginError(error);
+    } else {
+      console.error('Auth error:', error);
+    }
     setShowWebView(false);
   };
 
@@ -69,13 +75,15 @@ export default function Login({ onLogin, onBack }) {
             <LoginSection>
               <LoginTitle>Bem-vindo</LoginTitle>
               <LoginDescription>
-                Faça login com sua conta gov.br para acessar seus documentos digitais
+                {isWorkshopMode
+                  ? 'Entre com uma identidade de teste para acessar as credenciais da oficina.'
+                  : 'Faça login com sua conta gov.br para acessar seus documentos digitais'}
               </LoginDescription>
-
-              <GovButton onPress={() => setShowWebView(true)} activeOpacity={0.8}>
+              <GovButton onPress={() => { setLoginError(''); setShowWebView(true); }} activeOpacity={0.8}>
                 <Ionicons name="shield-outline" size={24} color="#FFFFFF" />
-                <GovButtonText>Entrar com gov.br</GovButtonText>
+                <GovButtonText>{isWorkshopMode ? 'Entrar na oficina' : 'Entrar com gov.br'}</GovButtonText>
               </GovButton>
+              {!!loginError && <Text style={{ color: '#B91C1C', marginTop: 16, textAlign: 'center' }}>{loginError}</Text>}
             </LoginSection>
             <FooterText>
               Ao continuar, você concorda com os Termos de Uso e Política de Privacidade.

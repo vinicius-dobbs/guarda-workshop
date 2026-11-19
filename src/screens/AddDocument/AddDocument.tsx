@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useIssuers } from '../../hooks/useIssuers';
 import { useWallet } from '../../hooks/useWallet';
 import { useAuthStore } from '../../store/authStore';
+import { isWorkshopMode } from '../../services/workshopIssuer';
 import SuccessModal from '../../components/SuccessModal';
 import ErrorModal from '../../components/ErrorModal';
 import NoCredentialModal from '../../components/NoCredentialModal';
@@ -57,7 +58,11 @@ export default function AddDocument({ sdkReady, onBack, onLoginRequired }: AddDo
         setShowNoCredentialModal(true);
         return;
       }
-      showError('Falha ao baixar credencial. Tente novamente.');
+      if (isWorkshopMode && e?.code === 'WORKSHOP_TOKEN_INVALID') {
+        showError(e.message);
+        return;
+      }
+      showError(isWorkshopMode ? 'Falha na emissão da oficina. Verifique o token, a rede e os logs do Certify.' : 'Falha ao baixar credencial. Tente novamente.');
     }
   };
 
@@ -66,6 +71,7 @@ export default function AddDocument({ sdkReady, onBack, onLoginRequired }: AddDo
     const isDownloading = downloadingId === itemId;
     return (
       <Card
+        key={item.id}
         available
         cardColor="#3B82F6"
         disabled={downloadingId !== null}
@@ -110,9 +116,9 @@ export default function AddDocument({ sdkReady, onBack, onLoginRequired }: AddDo
         renderItem={({ item: section }) => (
           <View>
             {sections.length > 1 && renderSectionHeader(section.title)}
-            {section.data.map((type: any, i: number) =>
+            {section.data.map((type: any) =>
               renderItem({ item: {
-                id: `${section.issuer.id}-${i}`,
+                id: `${section.issuer.id}-${type.id}`,
                 title: type.name || type.id,
                 issuer: section.issuer,
                 type,

@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { VCSDK } from '@br.gov.dataprev.inji/wallet-sdk';
 import { useAuthStore } from '../store/authStore';
+import { isWorkshopMode } from '../services/workshopIssuer';
+import { getWorkshopTokenProblem } from '../services/workshopToken';
 
 export interface WalletCredential {
   id: string;
@@ -69,6 +71,10 @@ export function useWallet(enabled: boolean = true) {
     setDownloadingId(id);
     try {
       if (!accessToken) throw Object.assign(new Error('[Wallet] Auth required'), { code: 'AUTH_REQUIRED' });
+      if (isWorkshopMode) {
+        const problem = getWorkshopTokenProblem(accessToken);
+        if (problem) throw Object.assign(new Error(problem), { code: 'WORKSHOP_TOKEN_INVALID' });
+      }
       const result = await VCSDK.credentials.download(issuer, type, accessToken);
       if (result === null) throw Object.assign(new Error('[Wallet] Auth required'), { code: 'AUTH_REQUIRED' });
       await loadCredentials();

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { VCSDK } from '@br.gov.dataprev.inji/wallet-sdk';
+import { getWorkshopIssuerSections, isWorkshopMode } from '../services/workshopIssuer';
 
 interface CredentialType {
   id: string;
@@ -27,6 +28,7 @@ function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
 }
 
 async function fetchIssuers(): Promise<IssuerSection[]> {
+  if (isWorkshopMode) return withTimeout(getWorkshopIssuerSections(), TIMEOUT_MS);
   try {
     const list: Issuer[] = await withTimeout(VCSDK.issuers.getAll(), TIMEOUT_MS);
 
